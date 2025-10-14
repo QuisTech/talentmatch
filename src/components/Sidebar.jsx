@@ -1,6 +1,27 @@
+// ===== FILE: ./src/components/Sidebar.jsx =====
 import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Sidebar({ className }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const menuItems = [
+    { id: 'dashboard', label: 'Dashboard', path: '/dashboard' },
+    { id: 'candidates', label: 'Candidates', path: '/candidates' },
+    { id: 'interviews', label: 'Interviews', path: '/interviews' },
+    { id: 'settings', label: 'Settings', path: '/settings' },
+  ];
+
+  const handleNavigation = (path) => {
+    if (path === '/dashboard') {
+      navigate('/dashboard');
+    } else {
+      // For other routes that don't exist, show alert
+      alert(`${path.slice(1).charAt(0).toUpperCase() + path.slice(2)} feature is coming soon!`);
+    }
+  };
+
   return (
     <aside
       className={`w-64 p-4 bg-white/60 backdrop-blur rounded-r-2xl shadow-sm hidden md:block ${className || ""}`}
@@ -13,18 +34,19 @@ export default function Sidebar({ className }) {
       </div>
 
       <nav className="space-y-2">
-        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-indigo-100">
-          Dashboard
-        </button>
-        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-indigo-100">
-          Candidates
-        </button>
-        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-indigo-100">
-          Interviews
-        </button>
-        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-indigo-100">
-          Settings
-        </button>
+        {menuItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => handleNavigation(item.path)}
+            className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
+              location.pathname === item.path 
+                ? 'bg-indigo-100 text-indigo-700 font-medium' 
+                : 'hover:bg-indigo-50 text-gray-700'
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
       </nav>
     </aside>
   );

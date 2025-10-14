@@ -1,6 +1,5 @@
 // ===== FILE: ./src/pages/Dashboard.jsx =====
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react"; // Remove useEffect import
 import Sidebar from "../components/Sidebar";
 import JobEditor from "../components/JobEditor";
 import UploadDropzone from "../components/UploadDropzone";
@@ -12,40 +11,19 @@ import {
   analyzeJobDescription,
   uploadCandidateFiles,
   generateInterviewQuestions,
-  getStoredCandidates
+  // Remove getStoredCandidates import
 } from "../utils/api";
 
 export default function Dashboard() {
   const [parsedJD, setParsedJD] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [candidates, setCandidates] = useState([]);
+  const [candidates, setCandidates] = useState([]); // Start with empty array
   const [questions, setQuestions] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
 
-  // Load existing candidates on component mount
-  useEffect(() => {
-    loadStoredCandidates();
-  }, []);
-
-  const loadStoredCandidates = async () => {
-    try {
-      const data = await getStoredCandidates();
-      if (data.candidates && data.candidates.length > 0) {
-        // Format stored candidates for the frontend
-        const formattedCandidates = data.candidates.map(candidate => ({
-          id: candidate.id,
-          name: candidate.name,
-          experience: candidate.experience,
-          skills: candidate.skills,
-          score: 50 // Default score for existing candidates
-        }));
-        setCandidates(formattedCandidates);
-      }
-    } catch (error) {
-      console.error("Failed to load stored candidates:", error);
-    }
-  };
+  // REMOVE the useEffect that loads stored candidates on mount
+  // This ensures fresh start on every page load
 
   const handleAnalyzeJob = async (text) => {
     setAnalyzing(true);
@@ -120,6 +98,13 @@ export default function Dashboard() {
     setCandidates(prev => prev.slice().sort((a, b) => (b.score || 0) - (a.score || 0)));
   };
 
+  // Add a clear function to reset everything
+  const handleClearAll = () => {
+    setCandidates([]);
+    setQuestions([]);
+    setParsedJD(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 p-6">
@@ -130,8 +115,18 @@ export default function Dashboard() {
         <div className="md:col-span-9 space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">AI Hiring Assistant</h1>
-            <div className="text-sm text-slate-500">
-              {candidates.length} candidates loaded • Ready to match
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-slate-500">
+                {candidates.length} candidates loaded • Ready to match
+              </div>
+              {candidates.length > 0 && (
+                <button
+                  onClick={handleClearAll}
+                  className="px-3 py-1 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50"
+                >
+                  Clear All
+                </button>
+              )}
             </div>
           </div>
 
