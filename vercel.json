@@ -1,13 +1,9 @@
 {
   "version": 2,
-  "name": "talentmatch",
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+      "use": "@vercel/static-build"
     }
   ],
   "routes": [
@@ -15,8 +11,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "VITE_API_BASE_URL": "https://your-backend-url.vercel.app"
-  }
+  ]
 }
