@@ -1,0 +1,10 @@
+# ===== FILE: ./requirements.txt =====
+
+flask
+flask-cors
+python-dotenv
+openai
+pinecone-client>=3.0.0
+pytest
+scikit-learn
+numpy

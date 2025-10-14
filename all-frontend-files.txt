@@ -1,0 +1,1110 @@
+
+
+// ===== FILE: ./src/App.jsx =====
+
+// src/App.jsx
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";  // <- make sure this file exists
+import Dashboard from "./pages/Dashboard";
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
+  );
+}
+
+
+// ===== FILE: ./src/components/CandidateRanking.jsx =====
+
+import React from "react";
+
+export default function CandidateRanking({ candidates }) {
+  return (
+    <div className="p-4 bg-white rounded-lg shadow">
+      <h2 className="text-xl font-bold mb-2">Candidate Ranking</h2>
+      <ul className="list-disc pl-5">
+        {candidates.map((c) => (
+          <li key={c.id}>
+            {c.name} — Score: {c.score}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/CandidateUpload.jsx =====
+
+// src/components/CandidateUpload.jsx
+import React, { useState } from 'react';
+
+export default function CandidateUpload({ onUpload }) {
+  const [names, setNames] = useState('');
+
+  const handleUpload = () => {
+    if (names.trim() === '') {
+      alert('Enter candidate names separated by commas.');
+      return;
+    }
+    const candidates = names.split(',').map((n) => n.trim());
+    onUpload(candidates);
+  };
+
+  return (
+    <div className="p-6 border rounded-lg bg-white shadow-md space-y-2">
+      <h2 className="text-xl font-semibold">Upload candidates</h2>
+      <textarea
+        value={names}
+        onChange={(e) => setNames(e.target.value)}
+        rows={4}
+        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        placeholder="Enter candidate names separated by commas"
+      />
+      <button
+        onClick={handleUpload}
+        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+      >
+        Upload
+      </button>
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/ExportPanel.jsx =====
+
+import React from "react";
+
+export default function ExportPanel({ candidates = [], questions = [] }) {
+  const handleDownload = () => {
+    const payload = { candidates, questions, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'talentmatch-results.json';
+    a.click();
+  };
+
+  const handleCopy = async () => {
+    const payload = { candidates, questions };
+    await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+    alert('Summary copied to clipboard');
+  };
+
+  return (
+    <div className="p-6 bg-white rounded-2xl shadow space-y-3">
+      <h3 className="text-lg font-semibold">Export</h3>
+      <div className="text-sm text-slate-500">Download or copy a summary of results.</div>
+      <div className="flex items-center gap-3">
+        <button onClick={handleDownload} className="px-4 py-2 bg-green-600 text-white rounded">Download JSON</button>
+        <button onClick={handleCopy} className="px-4 py-2 border rounded">Copy summary</button>
+      </div>
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/ExportResults.jsx =====
+
+// src/components/ExportResults.jsx
+import React from 'react';
+
+export default function ExportResults({ candidates, questions }) {
+  return (
+    <div className="p-6 border rounded-lg bg-white shadow-md space-y-2">
+      <h2 className="text-xl font-semibold">Export Results</h2>
+      <p><strong>Candidates:</strong> {candidates.join(', ')}</p>
+      <p><strong>Questions:</strong> {questions.join('; ')}</p>
+      <button className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+        Export (placeholder)
+      </button>
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/FeatureCard.jsx =====
+
+// ./components/FeatureCard.jsx
+import React from "react";
+
+export default function FeatureCard({ title, description, icon }) {
+  return (
+    <div className="p-8 border rounded-2xl shadow-sm bg-slate-50 hover:shadow-md transition">
+      <div className="text-4xl mb-4">{icon}</div>
+      <h4 className="text-xl font-semibold mb-2">{title}</h4>
+      <p className="text-slate-600 text-sm">{description}</p>
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/Footer.jsx =====
+
+// ./components/Footer.jsx
+import React from "react";
+
+export default function Footer() {
+  return (
+    <footer className="border-t py-6 bg-white/50 backdrop-blur">
+      <div className="max-w-6xl mx-auto text-center text-slate-500 text-sm">
+        © {new Date().getFullYear()} TalentMatch. All rights reserved.
+      </div>
+    </footer>
+  );
+}
+
+
+// ===== FILE: ./src/components/Header.jsx =====
+
+// ./components/Header.jsx
+import React from "react";
+import { useNavigate } from "react-router-dom";
+
+export default function Header() {
+  const navigate = useNavigate();
+
+  return (
+    <header className="w-full py-4 border-b bg-white/70 backdrop-blur fixed top-0 z-50">
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-6">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 bg-gradient-to-br from-indigo-600 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">TM</div>
+          <h1 className="font-semibold text-xl">TalentMatch</h1>
+        </div>
+        <nav className="flex items-center gap-4">
+          <button className="text-sm hover:text-indigo-600">Home</button>
+          <button className="text-sm hover:text-indigo-600">Features</button>
+          <button className="text-sm hover:text-indigo-600">Pricing</button>
+          <button className="text-sm hover:text-indigo-600">Contact</button>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="ml-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Sign up / Log in
+          </button>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+
+// ===== FILE: ./src/components/InterviewQuestions.jsx =====
+
+// src/components/InterviewQuestions.jsx
+import React, { useState } from 'react';
+
+export default function InterviewQuestions({ onGenerate, questions }) {
+  const handleGenerate = () => {
+    onGenerate();
+  };
+
+  return (
+    <div className="p-6 border rounded-lg bg-white shadow-md space-y-2">
+      <h2 className="text-xl font-semibold">Interview Questions</h2>
+      <button
+        onClick={handleGenerate}
+        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+      >
+        Generate Questions
+      </button>
+      {questions.length > 0 && (
+        <ul className="list-decimal list-inside mt-2">
+          {questions.map((q, i) => (
+            <li key={i}>{q}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/JobDescriptionInput.jsx =====
+
+// src/components/JobDescriptionInput.jsx
+import React, { useState } from 'react';
+
+export default function JobDescriptionInput({ onAnalyze }) {
+  const [jobText, setJobText] = useState('');
+
+  const handleAnalyze = () => {
+    if (jobText.trim() === '') {
+      alert('Please enter a job description!');
+      return;
+    }
+    // Call parent handler
+    onAnalyze(jobText);
+  };
+
+  return (
+    <div className="p-6 border rounded-lg bg-white shadow-md space-y-2">
+      <h2 className="text-xl font-semibold">Paste your job description here</h2>
+      <textarea
+        value={jobText}
+        onChange={(e) => setJobText(e.target.value)}
+        rows={6}
+        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        placeholder="Type or paste the job description..."
+      />
+      <button
+        onClick={handleAnalyze}
+        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+      >
+        Analyze
+      </button>
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/JobEditor.jsx =====
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+
+export default function JobEditor({ onAnalyze = () => {}, analyzing = false, parsed = null }) {
+  const [text, setText] = useState("");
+
+  const handleAnalyze = () => {
+    if (text.trim()) onAnalyze(text);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="p-6 bg-white rounded-2xl shadow">
+        <label className="block text-sm font-medium text-slate-700 mb-2">Job description</label>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={6}
+          className="w-full border rounded-md p-3 focus:ring-2 focus:ring-indigo-500"
+          placeholder="Paste or type the job description here..."
+        />
+        <div className="mt-3 flex items-center justify-between">
+          <div className="text-sm text-slate-500">{text.trim().split(/\s+/).filter(Boolean).length} words</div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleAnalyze}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            >
+              Analyze
+            </button>
+            <button
+              onClick={() => setText("")}
+              className="px-3 py-2 border rounded-md text-sm"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {analyzing && (
+        <div className="p-4 bg-white rounded-md shadow flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">⏳</div>
+          <div>
+            <div className="font-medium">Analyzing...</div>
+            <div className="text-sm text-slate-500">This usually takes a second.</div>
+          </div>
+        </div>
+      )}
+
+      {parsed && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 bg-white rounded-xl shadow-md"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-lg font-semibold">{parsed.title || "Untitled Role"}</div>
+              <div className="text-sm text-slate-500 mt-1">{parsed.summary || ""}</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {parsed.skills?.map((s, i) => (
+                  <span key={i} className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded">{s}</span>
+                ))}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold">{parsed.scoreHint ?? 0}%</div>
+              <div className="text-xs text-slate-500">JD completeness</div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/PricingCard.jsx =====
+
+import React from "react";
+
+export default function PricingCard({ tier, price, features, highlight }) {
+  return (
+    <div className={`p-8 rounded-2xl border ${highlight ? 'bg-indigo-600 text-white shadow-lg scale-105' : 'bg-white text-slate-900'}`}>
+      <h4 className="text-2xl font-semibold mb-2">{tier}</h4>
+      <div className="text-4xl font-bold mb-6">{price}</div>
+      <ul className="space-y-2 mb-8 text-sm">
+        {features.map((f, i) => (
+          <li key={i} className="flex items-center justify-center gap-2">
+            <span>{highlight ? '✅' : '✔️'}</span> {f}
+          </li>
+        ))}
+      </ul>
+      <button className={`px-6 py-3 rounded-xl font-medium ${highlight ? 'bg-white text-indigo-700 hover:bg-slate-100' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>
+        Get started
+      </button>
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/QuestionsPanel.jsx =====
+
+// ===== FILE: ./src/components/QuestionsPanel.jsx =====
+
+import React from "react";
+
+export default function QuestionsPanel({ questions = [], onGenerate = () => {}, generating = false }) {
+  return (
+    <div className="p-6 bg-white rounded-2xl shadow">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-semibold">Interview questions</h3>
+        <button 
+          onClick={onGenerate} 
+          className="px-3 py-1 bg-indigo-600 text-white rounded disabled:bg-gray-400"
+          disabled={generating}
+        >
+          {generating ? "Generating..." : "Generate"}
+        </button>
+      </div>
+
+      {generating ? (
+        <div className="text-sm text-slate-500">Generating questions...</div>
+      ) : questions.length === 0 ? (
+        <div className="text-sm text-slate-500">No questions yet — generate to see suggestions.</div>
+      ) : (
+        <div className="space-y-3 mt-3">
+          {questions.map((q, i) => (
+            <div key={i} className="p-3 border rounded-md bg-slate-50">
+              <div className="font-medium">Q{i+1}</div>
+              <div className="text-sm mt-1">{q}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== FILE: ./src/components/RankingTable.jsx =====
+
+import React from "react";
+
+export default function RankingTable({ candidates = [], onSort = () => {} }) {
+  const sorted = candidates.slice().sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+
+  return (
+    <div className="p-6 bg-white rounded-2xl shadow">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold">Candidate ranking</h3>
+        <button onClick={onSort} className="text-sm px-3 py-1 border rounded">Sort</button>
+      </div>
+
+      <div className="space-y-3">
+        {sorted.map((c, idx) => (
+          <div key={c.id ?? idx} className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="font-medium">{c.name || `Candidate ${idx+1}`}</div>
+              <div className="text-xs text-slate-500">{c.experience || ""}</div>
+            </div>
+            <div className="w-56">
+              <div className="text-sm text-slate-500 mb-1">{c.score ?? 0}% match</div>
+              <div className="h-2 bg-slate-100 rounded overflow-hidden">
+                <div style={{width: (c.score ?? 0) + '%'}} className="h-full bg-gradient-to-r from-green-400 to-emerald-500"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/Sidebar.jsx =====
+
+import React from "react";
+
+export default function Sidebar({ className }) {
+  return (
+    <aside
+      className={`w-64 p-4 bg-white/60 backdrop-blur rounded-r-2xl shadow-sm hidden md:block ${className || ""}`}
+    >
+      <div className="flex items-center gap-3 mb-6 px-2">
+        <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-indigo-600 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+          TM
+        </div>
+        <h2 className="text-xl font-semibold">TalentMatch</h2>
+      </div>
+
+      <nav className="space-y-2">
+        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-indigo-100">
+          Dashboard
+        </button>
+        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-indigo-100">
+          Candidates
+        </button>
+        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-indigo-100">
+          Interviews
+        </button>
+        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-indigo-100">
+          Settings
+        </button>
+      </nav>
+    </aside>
+  );
+}
+
+
+// ===== FILE: ./src/components/Testimonial.jsx =====
+
+import React from "react";
+
+export default function Testimonial({ quote, name }) {
+  return (
+    <div className="p-6 bg-white rounded-2xl shadow-sm border">
+      <p className="italic mb-4 text-slate-700">“{quote}”</p>
+      <div className="text-sm font-medium text-slate-600">— {name}</div>
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/components/UploadDropzone.jsx =====
+
+// ===== FILE: ./src/components/UploadDropzone.jsx =====
+
+import React, { useRef, useState } from "react";
+
+export default function UploadDropzone({ onUpload = () => {}, uploading = false }) {
+  const inputRef = useRef();
+  const [preview, setPreview] = useState([]);
+
+  const handleFiles = (files) => {
+    const arr = Array.from(files).map((f) => (f.name ? f.name : String(f)));
+    setPreview(arr);
+    onUpload(arr);
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    handleFiles(e.dataTransfer.files);
+  };
+
+  return (
+    <div
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={onDrop}
+      className="p-6 bg-white rounded-2xl shadow border-dashed border-2 border-transparent hover:border-slate-200"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="font-semibold">Upload resumes (drag & drop or paste names)</div>
+          <div className="text-sm text-slate-500">
+            {uploading ? "Uploading candidates..." : "Supports multiple files. For demo, you can paste names below and hit Upload."}
+          </div>
+        </div>
+        <div>
+          <input
+            ref={inputRef}
+            type="file"
+            multiple
+            onChange={(e) => handleFiles(e.target.files)}
+            className="hidden"
+          />
+          <button 
+            onClick={() => inputRef.current.click()} 
+            className="px-3 py-2 bg-indigo-600 text-white rounded-md disabled:bg-gray-400"
+            disabled={uploading}
+          >
+            {uploading ? "Uploading..." : "Select files"}
+          </button>
+        </div>
+      </div>
+
+      {preview.length > 0 && (
+        <div className="mt-4">
+          <div className="text-sm font-medium mb-2">
+            {uploading ? "Uploading..." : "Ready to upload:"}
+          </div>
+          <ul className="list-disc pl-5 space-y-1">
+            {preview.map((p, i) => (
+              <li key={i} className="text-sm">{p}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== FILE: ./src/index.css =====
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+// ===== FILE: ./src/main.jsx =====
+
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+
+// ===== FILE: ./src/pages/Dashboard.jsx =====
+
+// ===== FILE: ./src/pages/Dashboard.jsx =====
+
+import React, { useState, useEffect } from "react";
+import Sidebar from "../components/Sidebar";
+import JobEditor from "../components/JobEditor";
+import UploadDropzone from "../components/UploadDropzone";
+import RankingTable from "../components/RankingTable";
+import QuestionsPanel from "../components/QuestionsPanel";
+import ExportPanel from "../components/ExportPanel";
+
+import {
+  analyzeJobDescription,
+  uploadCandidateFiles,
+  generateInterviewQuestions,
+  getStoredCandidates
+} from "../utils/api";
+
+export default function Dashboard() {
+  const [parsedJD, setParsedJD] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [candidates, setCandidates] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [generatingQuestions, setGeneratingQuestions] = useState(false);
+
+  // Load existing candidates on component mount
+  useEffect(() => {
+    loadStoredCandidates();
+  }, []);
+
+  const loadStoredCandidates = async () => {
+    try {
+      const data = await getStoredCandidates();
+      if (data.candidates && data.candidates.length > 0) {
+        // Format stored candidates for the frontend
+        const formattedCandidates = data.candidates.map(candidate => ({
+          id: candidate.id,
+          name: candidate.name,
+          experience: candidate.experience,
+          skills: candidate.skills,
+          score: 50 // Default score for existing candidates
+        }));
+        setCandidates(formattedCandidates);
+      }
+    } catch (error) {
+      console.error("Failed to load stored candidates:", error);
+    }
+  };
+
+  const handleAnalyzeJob = async (text) => {
+    setAnalyzing(true);
+    try {
+      const res = await analyzeJobDescription(text);
+      setParsedJD(res);
+      
+      // If we have matching candidates from the analysis, update our candidates list
+      if (res.matching_candidates && res.matching_candidates.length > 0) {
+        const matchedCandidates = res.matching_candidates.map(match => ({
+          id: match.candidate_id,
+          name: match.metadata?.name || 'Unknown Candidate',
+          experience: match.metadata?.experience || 'Not specified',
+          skills: match.metadata?.skills || [],
+          score: match.score || 0
+        }));
+        
+        // Merge with existing candidates, updating scores for matched ones
+        setCandidates(prev => {
+          const updated = [...prev];
+          matchedCandidates.forEach(matched => {
+            const existingIndex = updated.findIndex(c => c.id === matched.id);
+            if (existingIndex >= 0) {
+              updated[existingIndex] = { ...updated[existingIndex], score: matched.score };
+            } else {
+              updated.push(matched);
+            }
+          });
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.error("Job analysis error:", error);
+      alert("Failed to analyze job description. Check console for details.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleCandidateUpload = async (items) => {
+    setUploading(true);
+    try {
+      const uploaded = await uploadCandidateFiles(items, parsedJD || {});
+      setCandidates(prev => {
+        // Merge new candidates, avoiding duplicates by ID
+        const existingIds = new Set(prev.map(c => c.id));
+        const newCandidates = uploaded.filter(c => !existingIds.has(c.id));
+        return [...prev, ...newCandidates];
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Failed to upload candidates. Check console for details.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleGenerateQuestions = async () => {
+    setGeneratingQuestions(true);
+    try {
+      const qs = await generateInterviewQuestions(parsedJD || {}, candidates);
+      setQuestions(qs);
+    } catch (error) {
+      console.error("Question generation error:", error);
+      alert("Failed to generate questions. Check console for details.");
+    } finally {
+      setGeneratingQuestions(false);
+    }
+  };
+
+  const handleSort = () => {
+    setCandidates(prev => prev.slice().sort((a, b) => (b.score || 0) - (a.score || 0)));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 p-6">
+        <div className="md:col-span-3 hidden md:block">
+          <Sidebar />
+        </div>
+
+        <div className="md:col-span-9 space-y-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">AI Hiring Assistant</h1>
+            <div className="text-sm text-slate-500">
+              {candidates.length} candidates loaded • Ready to match
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <JobEditor
+                onAnalyze={handleAnalyzeJob}
+                analyzing={analyzing}
+                parsed={parsedJD}
+              />
+              <UploadDropzone 
+                onUpload={handleCandidateUpload} 
+                uploading={uploading}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <RankingTable 
+                candidates={candidates} 
+                onSort={handleSort} 
+              />
+              <QuestionsPanel 
+                questions={questions} 
+                onGenerate={handleGenerateQuestions}
+                generating={generatingQuestions}
+              />
+              <ExportPanel 
+                candidates={candidates} 
+                questions={questions} 
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== FILE: ./src/pages/LandingPage.jsx =====
+
+// src/pages/LandingPage.jsx
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import FeatureCard from '../components/FeatureCard';
+import Testimonial from '../components/Testimonial';
+import PricingCard from '../components/PricingCard';
+
+export default function LandingPage() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-50 to-white text-slate-900">
+      {/* Header */}
+      <Header />
+
+      {/* Hero Section */}
+      <main className="flex flex-col items-center justify-center text-center flex-1 px-6 pt-32 pb-20">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-5xl md:text-6xl font-extrabold max-w-3xl leading-tight"
+        >
+          AI that matches top talent to your job description instantly.
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mt-6 text-lg md:text-xl text-slate-600 max-w-2xl"
+        >
+          Post your job, upload resumes, and let our AI instantly rank and match candidates for you.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.4 }}
+          className="mt-10 flex flex-col sm:flex-row gap-4"
+        >
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="px-8 py-4 bg-indigo-600 text-white rounded-xl text-lg shadow hover:bg-indigo-700"
+          >
+            Try it now
+          </button>
+          <button className="px-8 py-4 border border-slate-300 rounded-xl text-lg hover:bg-slate-50">
+            Get started
+          </button>
+        </motion.div>
+      </main>
+
+      {/* Features Section */}
+      <section className="py-24 bg-white" id="features">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h3 className="text-3xl font-bold mb-10">Why TalentMatch?</h3>
+          <div className="grid md:grid-cols-3 gap-10">
+            <FeatureCard
+              title="Instant AI Matching"
+              description="Paste a job description and instantly get top candidates ranked by relevance."
+              icon="⚡"
+            />
+            <FeatureCard
+              title="Smart Resume Parsing"
+              description="Upload resumes or LinkedIn URLs – our AI extracts key skills, experience, and more."
+              icon="📄"
+            />
+            <FeatureCard
+              title="Interview Ready"
+              description="Generate interview questions tailored to your job and candidates in one click."
+              icon="🎯"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 bg-indigo-50" id="testimonials">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h3 className="text-3xl font-bold mb-10">What our users say</h3>
+          <div className="grid md:grid-cols-3 gap-8">
+            <Testimonial quote="TalentMatch saved us countless hours in our hiring process!" name="Sarah, Tech Recruiter" />
+            <Testimonial quote="Our team found better candidates faster than ever before." name="James, Hiring Manager" />
+            <Testimonial quote="Incredible tool – we got interview-ready shortlists in minutes." name="Priya, HR Lead" />
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-24 bg-white" id="pricing">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h3 className="text-3xl font-bold mb-10">Simple, transparent pricing</h3>
+          <div className="grid md:grid-cols-3 gap-8">
+            <PricingCard
+              tier="Starter"
+              price="$0"
+              features={['1 job post / month', 'AI JD analysis', 'Basic candidate ranking']}
+            />
+            <PricingCard
+              tier="Pro"
+              price="$49/mo"
+              features={['Unlimited jobs', 'Resume upload', 'Full AI matching', 'Interview question generator']}
+              highlight
+            />
+            <PricingCard
+              tier="Enterprise"
+              price="Custom"
+              features={['Dedicated support', 'Team dashboards', 'Custom integrations']}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="py-24 bg-indigo-100" id="contact">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h3 className="text-3xl font-bold mb-6">Get in touch or sign up</h3>
+          <p className="text-slate-600 mb-8">
+            Join our early access list to try TalentMatch before public launch. We'll notify you as soon as it's ready.
+          </p>
+          <form className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="w-full sm:w-2/3 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+            <button
+              type="submit"
+              className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
+            >
+              Join waitlist
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
+}
+
+
+// ===== FILE: ./src/utils/api.js =====
+
+/**
+ * Mock API helpers for Dashboard demo.
+ * Replace these with real API / LLM calls later.
+ */
+
+export async function analyzeJobDescription(jobText) {
+  // simulate work
+  await new Promise((r) => setTimeout(r, 700));
+  const words = jobText.trim().split(/\s+/).filter(Boolean);
+  return {
+    title: words.slice(0,3).join(' ') || 'Untitled Role',
+    skills: ['React', 'Node.js', 'TypeScript', 'Testing'].slice(0, Math.min(4, Math.max(1, Math.floor(words.length/10)))),
+    summary: jobText.slice(0, 240) + (jobText.length > 240 ? '...' : ''),
+    scoreHint: Math.min(100, Math.max(40, Math.floor(words.length * 2)))
+  };
+}
+
+export async function uploadCandidateFiles(filesOrNames, parsedJD) {
+  // filesOrNames: either File objects or array of strings (our placeholders)
+  await new Promise((r) => setTimeout(r, 400));
+  // Normalize to candidates array
+  const items = filesOrNames.map((f, i) => {
+    const name = typeof f === 'string' ? f : (f.name || `Candidate ${i+1}`);
+    return {
+      id: `${Date.now()}-${i}`,
+      name,
+      experience: `${1 + (i % 7)} years`,
+      score: Math.floor(50 + Math.random() * 50) // mock score 50-99
+    };
+  });
+  return items;
+}
+
+export async function generateInterviewQuestions(parsedJD, candidates) {
+  await new Promise((r) => setTimeout(r, 500));
+  // basic mock: return 3 questions per candidate + 2 role-level questions
+  const base = [
+    `Tell us about a project where you used ${parsedJD?.skills?.[0] ?? 'relevant tech'}.`,
+    `How do you approach debugging and testing?`,
+  ];
+  const perCandidate = candidates.slice(0,5).flatMap((c, idx) => [
+    `For ${c.name}: describe a challenge you solved in ${c.experience}.`,
+  ]);
+  return [...base, ...perCandidate];
+}
+
+
+// ===== FILE: ./utils/api.js =====
+
+// ===== FILE: ./src/utils/api.js =====
+
+/**
+ * API helpers for TalentMatch - Connects to Flask backend
+ */
+
+const API_BASE_URL = "http://localhost:5000"; // Your Flask backend
+
+// Analyze job description
+export async function analyzeJobDescription(jobText) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/jobs/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ job_text: jobText })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Job analysis response:", data);
+    return data;
+  } catch (error) {
+    console.error("Job analysis failed:", error);
+    throw error;
+  }
+}
+
+// Upload candidates
+export async function uploadCandidateFiles(filesOrNames, parsedJD = {}) {
+  try {
+    // Convert file names or File objects to candidate objects
+    const candidates = filesOrNames.map((item, index) => {
+      if (typeof item === 'string') {
+        // If it's a string (name), create a mock candidate
+        return {
+          name: item,
+          email: `${item.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+          resume: `Experienced ${item} with relevant skills.`,
+          experience: `${2 + (index % 5)} years`,
+          skills: parsedJD.skills ? parsedJD.skills.slice(0, 3) : ["General Skills"]
+        };
+      } else {
+        // If it's a File object, you might want to read it
+        // For now, just use the filename
+        return {
+          name: item.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+          email: `${item.name.replace(/\.[^/.]+$/, "").toLowerCase().replace(/\s+/g, '.')}@example.com`,
+          resume: `Resume content for ${item.name}`,
+          experience: `${2 + (index % 5)} years`,
+          skills: parsedJD.skills ? parsedJD.skills.slice(0, 3) : ["General Skills"]
+        };
+      }
+    });
+
+    const response = await fetch(`${API_BASE_URL}/candidates/upload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ candidates })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Candidate upload response:", data);
+    
+    // Format the response to match your frontend expectations
+    return data.map(candidate => ({
+      id: candidate.id,
+      name: candidate.name,
+      email: candidate.email,
+      experience: candidate.experience,
+      skills: candidate.skills,
+      score: candidate.score || Math.floor(50 + Math.random() * 50) // Fallback score
+    }));
+  } catch (error) {
+    console.error("Candidate upload failed:", error);
+    throw error;
+  }
+}
+
+// Generate interview questions
+export async function generateInterviewQuestions(parsedJD = {}, candidates = []) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/questions/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        job_description: parsedJD.summary || "Technical role",
+        job_skills: parsedJD.skills || [],
+        candidate_skills: candidates.flatMap(c => c.skills || []).slice(0, 5)
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Questions response:", data);
+    
+    // Return just the questions array
+    return data.questions || [];
+  } catch (error) {
+    console.error("Question generation failed:", error);
+    throw error;
+  }
+}
+
+// Add single candidate
+export async function addCandidate(candidateData) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidates/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(candidateData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Add candidate failed:", error);
+    throw error;
+  }
+}
+
+// Debug endpoint to see stored candidates
+export async function getStoredCandidates() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidates/debug`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Get stored candidates failed:", error);
+    throw error;
+  }
+}

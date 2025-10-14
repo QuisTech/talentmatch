@@ -1,45 +1,154 @@
+// ===== FILE: ./src/utils/api.js =====
+
 /**
- * Mock API helpers for Dashboard demo.
- * Replace these with real API / LLM calls later.
+ * API helpers for TalentMatch - Connects to Flask backend
  */
 
+const API_BASE_URL = "http://localhost:5000"; // Your Flask backend
+
+// Analyze job description
 export async function analyzeJobDescription(jobText) {
-  // simulate work
-  await new Promise((r) => setTimeout(r, 700));
-  const words = jobText.trim().split(/\s+/).filter(Boolean);
-  return {
-    title: words.slice(0,3).join(' ') || 'Untitled Role',
-    skills: ['React', 'Node.js', 'TypeScript', 'Testing'].slice(0, Math.min(4, Math.max(1, Math.floor(words.length/10)))),
-    summary: jobText.slice(0, 240) + (jobText.length > 240 ? '...' : ''),
-    scoreHint: Math.min(100, Math.max(40, Math.floor(words.length * 2)))
-  };
+  try {
+    const response = await fetch(`${API_BASE_URL}/jobs/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ job_text: jobText })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Job analysis response:", data);
+    return data;
+  } catch (error) {
+    console.error("Job analysis failed:", error);
+    throw error;
+  }
 }
 
-export async function uploadCandidateFiles(filesOrNames, parsedJD) {
-  // filesOrNames: either File objects or array of strings (our placeholders)
-  await new Promise((r) => setTimeout(r, 400));
-  // Normalize to candidates array
-  const items = filesOrNames.map((f, i) => {
-    const name = typeof f === 'string' ? f : (f.name || `Candidate ${i+1}`);
-    return {
-      id: `${Date.now()}-${i}`,
-      name,
-      experience: `${1 + (i % 7)} years`,
-      score: Math.floor(50 + Math.random() * 50) // mock score 50-99
-    };
-  });
-  return items;
+// Upload candidates
+export async function uploadCandidateFiles(filesOrNames, parsedJD = {}) {
+  try {
+    // Convert file names or File objects to candidate objects
+    const candidates = filesOrNames.map((item, index) => {
+      if (typeof item === 'string') {
+        // If it's a string (name), create a mock candidate
+        return {
+          name: item,
+          email: `${item.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+          resume: `Experienced ${item} with relevant skills.`,
+          experience: `${2 + (index % 5)} years`,
+          skills: parsedJD.skills ? parsedJD.skills.slice(0, 3) : ["General Skills"]
+        };
+      } else {
+        // If it's a File object, you might want to read it
+        // For now, just use the filename
+        return {
+          name: item.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+          email: `${item.name.replace(/\.[^/.]+$/, "").toLowerCase().replace(/\s+/g, '.')}@example.com`,
+          resume: `Resume content for ${item.name}`,
+          experience: `${2 + (index % 5)} years`,
+          skills: parsedJD.skills ? parsedJD.skills.slice(0, 3) : ["General Skills"]
+        };
+      }
+    });
+
+    const response = await fetch(`${API_BASE_URL}/candidates/upload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ candidates })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Candidate upload response:", data);
+    
+    // Format the response to match your frontend expectations
+    return data.map(candidate => ({
+      id: candidate.id,
+      name: candidate.name,
+      email: candidate.email,
+      experience: candidate.experience,
+      skills: candidate.skills,
+      score: candidate.score || Math.floor(50 + Math.random() * 50) // Fallback score
+    }));
+  } catch (error) {
+    console.error("Candidate upload failed:", error);
+    throw error;
+  }
 }
 
-export async function generateInterviewQuestions(parsedJD, candidates) {
-  await new Promise((r) => setTimeout(r, 500));
-  // basic mock: return 3 questions per candidate + 2 role-level questions
-  const base = [
-    `Tell us about a project where you used ${parsedJD?.skills?.[0] ?? 'relevant tech'}.`,
-    `How do you approach debugging and testing?`,
-  ];
-  const perCandidate = candidates.slice(0,5).flatMap((c, idx) => [
-    `For ${c.name}: describe a challenge you solved in ${c.experience}.`,
-  ]);
-  return [...base, ...perCandidate];
+// Generate interview questions
+export async function generateInterviewQuestions(parsedJD = {}, candidates = []) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/questions/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        job_description: parsedJD.summary || "Technical role",
+        job_skills: parsedJD.skills || [],
+        candidate_skills: candidates.flatMap(c => c.skills || []).slice(0, 5)
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Questions response:", data);
+    
+    // Return just the questions array
+    return data.questions || [];
+  } catch (error) {
+    console.error("Question generation failed:", error);
+    throw error;
+  }
+}
+
+// Add single candidate
+export async function addCandidate(candidateData) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidates/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(candidateData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Add candidate failed:", error);
+    throw error;
+  }
+}
+
+// Debug endpoint to see stored candidates - THIS WAS MISSING!
+export async function getStoredCandidates() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidates/debug`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Stored candidates:", data);
+    return data;
+  } catch (error) {
+    console.error("Get stored candidates failed:", error);
+    throw error;
+  }
 }

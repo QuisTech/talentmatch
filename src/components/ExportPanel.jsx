@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ExportPanel({ candidates, questions }) {
+export default function ExportPanel({ candidates = [], questions = [] }) {
   const handleDownload = () => {
     const payload = { candidates, questions, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
