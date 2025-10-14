@@ -1,10 +1,5 @@
-// ===== FILE: ./src/utils/api.js =====
-
-/**
- * API helpers for TalentMatch - Connects to Flask backend
- */
-
-const API_BASE_URL = "http://localhost:5000"; // Your Flask backend
+// Update the API_BASE_URL to use environment variable
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 // Analyze job description
 export async function analyzeJobDescription(jobText) {
