@@ -1,8 +1,9 @@
 TalentMatch - AI-Powered Recruitment Platform
-https://img.shields.io/badge/TalentMatch-AI%2520Recruitment-blue
-https://img.shields.io/badge/React-18.2.0-61dafb
-https://img.shields.io/badge/Flask-2.3.3-green
-https://img.shields.io/badge/Python-3.11-blue
+<img width="1366" height="768" alt="2 (2)" src="https://github.com/user-attachments/assets/86cd5f36-d181-4c53-a490-60e86ed017f5" />
+<img width="1366" height="768" alt="3 (2)" src="https://github.com/user-attachments/assets/f23064c6-39cd-4de6-a525-946d558b2e64" />
+<img width="1366" height="768" alt="4 (2)" src="https://github.com/user-attachments/assets/a68c0105-b154-4d44-aa43-790b6fc96683" />
+<img width="1366" height="768" alt="1 (2)" src="https://github.com/user-attachments/assets/122251bb-3d9b-49ba-839c-f70afa82dcc8" />
+
 
 TalentMatch is a modern, AI-powered recruitment platform that intelligently matches candidates to job descriptions using semantic similarity and machine learning.
 
@@ -147,38 +148,8 @@ POST /questions/generate - Generate interview questions
 
 POST /questions/submit - Submit and evaluate answers
 
-🏗 Project Structure
-text
-talentmatch/
-├── src/
-│   ├── components/          # React components
-│   │   ├── Dashboard/
-│   │   ├── Landing/
-│   │   └── Shared/
-│   ├── pages/              # Page components
-│   │   ├── Dashboard.jsx
-│   │   └── LandingPage.jsx
-│   ├── utils/              # Utilities and API
-│   │   └── api.js
-│   └── main.jsx           # App entry point
-├── backend/
-│   ├── routes/            # Flask route handlers
-│   │   ├── jobs.py
-│   │   ├── candidates.py
-│   │   └── questions.py
-│   ├── utils/             # Backend utilities
-│   │   ├── embeddings.py
-│   │   ├── parser.py
-│   │   └── scoring.py
-│   ├── pinecone_client.py # Vector database client
-│   └── app.py            # Flask application
-└── configuration/
-    ├── tailwind.config.js
-    ├── vite.config.js
-    └── package.json
-🔧 Configuration
-Environment Variables
-Backend (.env)
+<img width="509" height="713" alt="Tree" src="https://github.com/user-attachments/assets/44af85b1-1c74-42b5-b16c-945c9a14ea7c" />
+
 
 env
 PINECONE_API_KEY=your_pinecone_key
