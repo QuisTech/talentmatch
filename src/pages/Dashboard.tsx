@@ -13,7 +13,6 @@ const Dashboard: React.FC = () => {
   const [activeView, setActiveView] = useState<DashboardView>('overview');
   const [currentJob, setCurrentJob] = useState<JobDescription | null>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleJobAnalyzed = (job: JobDescription) => {
     setCurrentJob(job);
@@ -46,7 +45,6 @@ const Dashboard: React.FC = () => {
                 <h3 className="text-xl font-bold mb-4">1. Analyze Job Description</h3>
                 <JobDescriptionInput 
                   onJobAnalyzed={handleJobAnalyzed}
-                  disabled={isLoading}
                 />
                 {currentJob && (
                   <div className="mt-4 p-4 bg-green-50 rounded">
@@ -77,7 +75,6 @@ const Dashboard: React.FC = () => {
                   candidates={candidates}
                   job={currentJob}
                   onSelectCandidate={handleSelectCandidate}
-                  isLoading={isLoading}
                 />
               </div>
             )}
