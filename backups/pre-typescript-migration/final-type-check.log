@@ -1,0 +1,1 @@
+src/pages/Dashboard.tsx(16,21): error TS6133: 'setIsLoading' is declared but its value is never read.

@@ -1,0 +1,20 @@
+HIGH PRIORITY (Used in Dashboard):
+1. Sidebar.jsx
+2. JobDescriptionInput.jsx  
+3. CandidateUpload.jsx
+4. CandidateRanking.jsx
+5. InterviewQuestions.jsx
+
+MEDIUM PRIORITY (Used in LandingPage):
+6. Header.jsx
+7. Footer.jsx
+8. FeatureCard.jsx
+9. Testimonial.jsx
+10. PricingCard.jsx
+
+LOW PRIORITY:
+11. JobEditor.jsx
+12. UploadDropzone.jsx
+13. ExportPanel.jsx
+14. ExportResults.jsx
+15. QuestionsPanel.jsx
