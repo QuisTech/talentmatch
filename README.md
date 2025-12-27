@@ -172,7 +172,8 @@ export default defineConfig({
 Development
 bash
 # Backend
-cd backend && python -m backend.app
+cd backend && 
+.
 
 # Frontend  
 cd talentmatch && npm run dev
@@ -218,3 +219,96 @@ Built with ❤️ for better hiring experiences
 Report Bug · Request Feature
 
 </div>
+
+## 📋 Project Overview
+
+
+## 🏗️ TECH STACK
+```
+Project: talentmatch
+Frontend: React
+  Build: Vite
+  Language: TypeScript
+  CSS: Tailwind
+  Orchestration: docker-compose
+```
+
+## 📁 PROJECT STRUCTURE
+```
+.
+./.vscode
+./backend
+./backend/config
+./backend/database
+./backend/models
+./backend/routes
+./backend/src
+./backend/tests
+./backend/utils
+./backups
+./backups/pre-typescript-migration
+./config
+./config/environments
+./config/production
+```
+
+## 🔑 KEY FILES
+```
+backend/app.py
+dist/index.html
+index.html
+src/App.tsx
+src/index.css
+src/main.jsx
+src/main.tsx
+venv/Lib/site-packages/dotenv/main.py
+venv/Lib/site-packages/flask/app.py
+venv/Lib/site-packages/flask/sansio/app.py
+```
+
+## 📦 DEPENDENCIES
+```
+Frontend Dependencies:
+@auth0/auth0-react framer-motion react react-dom react-router-dom 
+```
+
+## 🔍 DETECTED FEATURES
+```
+✅ Auth: backend/production_auth.py
+✅ Auth: backend/routes/auth.py
+✅ Auth: config/production/oauth_config.py
+✅ API: backend/routes/api.py
+✅ API: src/lib/api.ts
+✅ API: src/types/api.ts
+✅ docker-compose ready
+```
+
+## 📊 QUICK STATS
+```
+Files (source):
+2243
+```
+
+## 🚀 GETTING STARTED
+```
+# Install dependencies
+npm install
+
+# Available scripts:
+npm run build
+npm run dev
+npm run preview
+npm run type-check
+npm run type-check:watch
+
+# Start with Docker
+docker-compose up
+```
+
+## 📝 COMMON NEXT STEPS
+```
+1. Check .env.example or .env for configuration
+2. Run npm install / pip install
+3. Start development server
+4. Check README.md for project-specific instructions
+```

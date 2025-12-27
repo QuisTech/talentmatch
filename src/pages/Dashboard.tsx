@@ -1,166 +1,150 @@
-import React, { useState } from 'react';
-import Sidebar from '@components/Sidebar';
-import JobDescriptionInput from '@components/JobDescriptionInput';
-import CandidateUpload from '@components/CandidateUpload';
-import CandidateRanking from '@components/CandidateRanking';
-import InterviewQuestions from '@components/InterviewQuestions';
-import { Candidate } from '../types/candidate';
-import { JobDescription } from '../types/job';
-
-type DashboardView = 'overview' | 'candidates' | 'jobs' | 'analytics';
+import React, { useState, useEffect } from 'react';
+import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
+import JobManager from '../components/admin/JobManager';
+import AnalyticsDashboard from '../components/admin/AnalyticsDashboard';
+import { WithPermission } from '../components/auth/WithPermission';
+import { Permission } from '../types/rbac.types';
+import { useAuth } from '../contexts/AuthContext';
+import { api } from '../lib/api';
 
 const Dashboard: React.FC = () => {
-  const [activeView, setActiveView] = useState<DashboardView>('overview');
-  const [currentJob, setCurrentJob] = useState<JobDescription | null>(null);
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalJobs: 0,
+    totalCandidates: 0,
+    averageScore: 0,
+  });
 
-  const handleJobAnalyzed = (job: JobDescription) => {
-    setCurrentJob(job);
-    console.log('Job analyzed:', job);
-  };
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
-  const handleCandidatesUploaded = (uploadedCandidates: Candidate[]) => {
-    setCandidates(prev => [...prev, ...uploadedCandidates]);
-    console.log('Candidates uploaded:', uploadedCandidates.length);
-  };
-
-  const handleSelectCandidate = (candidate: Candidate) => {
-    console.log('Candidate selected:', candidate.name);
-  };
-
-  const renderContent = () => {
-    switch (activeView) {
-      case 'overview':
-        return (
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-2xl font-bold mb-4">Welcome to TalentMatch Dashboard</h2>
-              <p className="text-gray-600">
-                Upload job descriptions and candidate resumes to start the AI-powered matching process.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-xl font-bold mb-4">1. Analyze Job Description</h3>
-                <JobDescriptionInput 
-                  onJobAnalyzed={handleJobAnalyzed}
-                />
-                {currentJob && (
-                  <div className="mt-4 p-4 bg-green-50 rounded">
-                    <p className="font-semibold">Current Job: {currentJob.title}</p>
-                    <p className="text-sm text-gray-600">{currentJob.requiredSkills.length} required skills identified</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-xl font-bold mb-4">2. Upload Candidates</h3>
-                <CandidateUpload 
-                  onUploadComplete={handleCandidatesUploaded}
-                  jobId={currentJob?.id}
-                />
-                {candidates.length > 0 && (
-                  <div className="mt-4 p-4 bg-blue-50 rounded">
-                    <p className="font-semibold">{candidates.length} candidates uploaded</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {currentJob && candidates.length > 0 && (
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-xl font-bold mb-4">3. AI Matching Results</h3>
-                <CandidateRanking 
-                  candidates={candidates}
-                  job={currentJob}
-                  onSelectCandidate={handleSelectCandidate}
-                />
-              </div>
-            )}
-          </div>
-        );
-
-      case 'candidates':
-        return (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-2xl font-bold mb-6">Candidate Management</h2>
-            <CandidateUpload onUploadComplete={handleCandidatesUploaded} />
-            {candidates.length > 0 ? (
-              <div className="mt-6">
-                <CandidateRanking 
-                  candidates={candidates}
-                  job={currentJob!}
-                  onSelectCandidate={handleSelectCandidate}
-                />
-              </div>
-            ) : (
-              <p className="text-gray-500 mt-4">No candidates uploaded yet.</p>
-            )}
-          </div>
-        );
-
-      case 'jobs':
-        return (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-2xl font-bold mb-6">Job Descriptions</h2>
-            <JobDescriptionInput onJobAnalyzed={handleJobAnalyzed} />
-            {currentJob && (
-              <div className="mt-6 p-4 bg-gray-50 rounded">
-                <h3 className="text-lg font-bold">Active Job</h3>
-                <p className="font-semibold">{currentJob.title}</p>
-                <p className="text-sm text-gray-600 mt-2">{currentJob.description.substring(0, 200)}...</p>
-              </div>
-            )}
-          </div>
-        );
-
-      case 'analytics':
-        return (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-2xl font-bold mb-6">Analytics & Reports</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="bg-blue-50 p-4 rounded">
-                <p className="text-sm text-blue-700">Total Candidates</p>
-                <p className="text-2xl font-bold">{candidates.length}</p>
-              </div>
-              <div className="bg-green-50 p-4 rounded">
-                <p className="text-sm text-green-700">Avg Match Score</p>
-                <p className="text-2xl font-bold">
-                  {candidates.length > 0 
-                    ? (candidates.reduce((acc, c) => acc + (c.score || 0), 0) / candidates.length).toFixed(1)
-                    : '0.0'}
-                </p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded">
-                <p className="text-sm text-purple-700">Jobs Analyzed</p>
-                <p className="text-2xl font-bold">{currentJob ? 1 : 0}</p>
-              </div>
-            </div>
-            <InterviewQuestions 
-              jobDescription={currentJob?.description || ''}
-              candidateSkills={candidates.flatMap(c => c.skills)}
-            />
-          </div>
-        );
-
-      default:
-        return <div>Select a view from the sidebar</div>;
+  const loadDashboardData = async () => {
+    try {
+      const [jobsRes, candidatesRes] = await Promise.all([
+        api.getJobs(),
+        api.getCandidates(),
+      ]);
+      
+      setStats({
+        totalJobs: jobsRes.data?.jobs?.length || 0,
+        totalCandidates: candidatesRes.data?.candidates?.length || 0,
+        averageScore: 78, // Mock average
+      });
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
-      <main className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">TalentMatch Dashboard</h1>
-            <p className="text-gray-600">AI-powered recruitment platform</p>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="flex">
+        <Sidebar />
+        
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Welcome Section */}
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600">
+                Welcome back, {user?.name || user?.email}! Here's your hiring overview.
+              </p>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-blue-100 rounded-lg mr-4">
+                    <span className="text-blue-600 font-bold">📋</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Active Jobs</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.totalJobs}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-green-100 rounded-lg mr-4">
+                    <span className="text-green-600 font-bold">👥</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Total Candidates</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.totalCandidates}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-purple-100 rounded-lg mr-4">
+                    <span className="text-purple-600 font-bold">🎯</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Avg Match Score</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.averageScore}%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Role-based Features */}
+            <div className="space-y-6">
+              {/* Job Management (Recruiters/Admins) */}
+              <WithPermission permission={Permission.VIEW_ALL_JOBS}>
+                <JobManager />
+              </WithPermission>
+
+              {/* Analytics (Admins/Hiring Managers) */}
+              <WithPermission permission={Permission.VIEW_ANALYTICS}>
+                <AnalyticsDashboard />
+              </WithPermission>
+
+              {/* Candidate View */}
+              {user?.role === 'candidate' && (
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Applications</h2>
+                  <p className="text-gray-600">
+                    You have applied to 3 positions. Check your application status below.
+                  </p>
+                  {/* Candidate-specific content would go here */}
+                </div>
+              )}
+
+              {/* AI Configuration (Admins only) */}
+              <WithPermission permission={Permission.CONFIGURE_AI}>
+                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">AI Configuration</h2>
+                  <p className="text-gray-600 mb-4">
+                    Configure AI models, scoring algorithms, and matching parameters.
+                  </p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Matching Threshold
+                      </label>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        defaultValue="70"
+                        className="w-full"
+                      />
+                    </div>
+                    <button className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                      Save Configuration
+                    </button>
+                  </div>
+                </div>
+              </WithPermission>
+            </div>
           </div>
-          {renderContent()}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
